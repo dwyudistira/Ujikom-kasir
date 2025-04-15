@@ -321,6 +321,19 @@
                     </a>
                 @endif
 
+                <!-- Pembelian -->
+                @if(Auth::user()->role == "Administrator")
+                    <a href="{{ route('admin.pembelian') }}" class="sidebar-link">
+                        <i class="fas fa-table"></i>
+                        <span>Pembelian</span>
+                    </a>
+                @elseif (Auth::user()->role == "Petugas")
+                    <a href="{{ route('petugas.pembelian') }}" class="sidebar-link">
+                        <i class="fas fa-table"></i>
+                        <span>Pembelian</span>
+                    </a>
+                @endif
+
                 <!-- Produk -->
                 @if(Auth::user()->role == "Administrator")
                     <a href="{{ route('admin.product') }}" class="sidebar-link">

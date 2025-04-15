@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 class ProdukController extends Controller
 {
     //
-
     public function index(){
         $products = Product::paginate(10);
 
@@ -21,13 +20,20 @@ class ProdukController extends Controller
     }
 
     public function store(Request $request)
-    {
+    {   
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',  
             'stock' => 'required|integer',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        // if ($request->hasFile('image')) {
+            $file = $request->file('image') ;
+            $fileName = $file->getClientOriginalName() ;
+            $destinationPath = public_path().'/images' ;
+            dd($file->move($destinationPath,$fileName));
+        // }        
 
         Product::create($validated);
     
@@ -73,7 +79,7 @@ class ProdukController extends Controller
 
         $data->delete();
 
-        return redirect('product');
+        return redirect()->route('admin.product');
     }
 
 }

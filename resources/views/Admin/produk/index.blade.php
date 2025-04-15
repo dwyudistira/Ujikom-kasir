@@ -118,7 +118,7 @@
                                         </svg>
                                         Stok
                                     </button>
-                                    <form action="{{ route('admin.product.delete', $product->id) }}" method="POST" class="delete-form">
+                                    <form action="{{ route('admin.product.destroy', $product->id) }}" method="POST" class="delete-form">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" 

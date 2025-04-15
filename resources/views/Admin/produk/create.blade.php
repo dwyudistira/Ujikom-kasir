@@ -1,4 +1,5 @@
 <x-app-layout>
+
     <div class="max-w-6xl mx-auto mt-12 p-10 bg-white shadow-2xl rounded-3xl border border-gray-100">
         @if(session('success'))
             <div class="mb-6 p-4 bg-green-100 text-green-800 rounded-lg">
@@ -10,10 +11,12 @@
                 {{ session('error') }}
             </div>
         @endif
+
         <!-- Penjelasan di atas form -->
     <div class="mb-8">
         <h3 class="text-2xl font-bold text-gray-800 mb-2">Tambah Produk</h3>
     </div>
+
 
         <form action="{{ route('admin.product.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
             @csrf

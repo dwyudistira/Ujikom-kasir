@@ -30,11 +30,11 @@
             <div class="mt-6 space-y-2 text-right">
                 <div class="font-semibold text-lg text-gray-700">
                     <p>Total Harga</p>
-                    <p id="total-harga" class="text-xl text-blue-700 font-bold">Rp.</p>
+                    <p id="total-harga" class="text-xl text-blue-700 font-bold">Rp. {{ number_format($data['subtotal'], 0, ',', '.') }}</p>
                 </div>
                 <div class="font-semibold text-lg text-gray-700">
                     <p>Total Bayar</p>
-                    <p id="total-bayar" class="text-xl text-green-600 font-bold">Rp. </p>
+                    <p id="total-bayar" class="text-xl text-green-600 font-bold">Rp. {{ number_format($sales->total_paid, 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
@@ -43,27 +43,32 @@
         <div class="flex-1 border border-gray-200 p-6 rounded-xl">
             <h2 class="text-2xl font-bold text-gray-700 mb-4">Detail Member</h2>
 
-            <form action="#" method="POST">
+            <form action="{{ route('petugas.pembelian.simpan_member') }}" method="POST">
                 @csrf
 
+                {{-- Nama Member --}}
                 <div class="mb-5">
                     <label class="block font-semibold text-gray-600">Nama Member</label>
                     <input type="text" name="nama" class="w-full p-3 border border-gray-300 rounded-md mt-1 focus:ring focus:ring-blue-100" value="{{ $sales->name }}" readonly>
                 </div>
 
+                {{-- Poin --}}
                 <div class="mb-5">
                     <label class="block font-semibold text-gray-600">Poin</label>
                     <input type="number" name="poin" class="w-full p-3 bg-gray-100 border border-gray-300 rounded-md mt-1" value="{{ $members->points }}" readonly>
                 </div>
 
+                {{-- Gunakan Poin --}}
                 <div class="flex items-center gap-3 mb-6">
                     <input type="checkbox" id="gunakan-poin" name="gunakan_poin" value="1" class="form-check-input rounded">
                     <label for="gunakan-poin" class="text-gray-700 font-medium">Gunakan Poin</label>
                 </div>
 
+                {{-- ID Member atau Nomor Telepon --}}
                 <input type="hidden" name="member_id" value="{{ $members->id }}">
                 <input type="hidden" name="total_bayar" value="{{ $sales->total_paid }}">
 
+                {{-- Submit --}}
                 <div class="flex justify-end">
                     <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-200">Selanjutnya</button>
                 </div>
