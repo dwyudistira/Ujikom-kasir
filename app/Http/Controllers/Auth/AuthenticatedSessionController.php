@@ -28,7 +28,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        if(Auth::user()->role == 'Administrator'){
+            return redirect()->route('admin.dashboard');
+        } elseif(Auth::user()->role == 'Administrator'){
+            return redirect()->route('petugas.dashboard');
+        }
     }
 
     /**

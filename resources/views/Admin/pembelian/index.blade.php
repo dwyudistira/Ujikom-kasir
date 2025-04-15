@@ -7,10 +7,21 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+            @if(session('success'))
+                <div class="mb-6 p-4 bg-green-50 text-green-700 rounded-lg font-medium">
+                    {{ session('success') }}
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="mb-6 p-4 bg-red-50 text-red-700 rounded-lg font-medium">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-semibold text-gray-800">Data Penjualan</h3>
                 <div class="space-x-3">
-                    <a href="#" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition flex items-center">
+                    <a href="{{ route('admin.pembelian.export') }}" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -32,12 +43,13 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($purchases as $purchase)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Non-member</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">day</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">Rp 1.000.000</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Petugas</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $purchase['name'] }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $purchase['created_at']->format('d-m-Y') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">Rp {{ number_format($purchase['subtotal'], 0, ',', '.') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $purchase['made_by'] }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
                                     <button type="button" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md text-sm flex items-center" data-bs-toggle="modal" 
@@ -62,7 +74,7 @@
             </div>
 
             <div class="mt-6">
-                
+                {{ $purchases->links() }}
             </div>
         </div>
     </div>
