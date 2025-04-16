@@ -17,38 +17,75 @@ class PembelianController extends Controller
 {
     public function index()
     {
-        // Ambil semua data dari Sales
-        $allSales = Sales::all();
-        
-        // Group berdasarkan invoice_number
+        $query = Sales::with('member');
+    
+        // Filter by day, month, and year
+        if ($day = request('day')) {
+            $query->whereDay('created_at', $day);
+        }
+    
+        if ($month = request('month')) {
+            $query->whereMonth('created_at', $month);
+        }
+    
+        if ($year = request('year')) {
+            $query->whereYear('created_at', $year);
+        }
+    
+        $allSales = $query->get(); 
+    
         $grouped = $allSales->groupBy('invoice_number');
-        
-        // Mapping hasil group jadi ringkasan per invoice
+    
         $collection = $grouped->map(function ($items, $invoiceNumber) {
+            $products = $items->map(function ($item) {
+                $productData = json_decode($item->product_data, true);
+    
+                return [
+                    'name' => $productData['nama'] ?? 'Non-Member', 
+                    'qty' => $item->quantity ?? 0, 
+                    'price' => $productData['subtotal'] ?? 0, 
+                    'subtotal' => $item->subtotal ?? 0, 
+                ];
+            });
+    
+            $member = $items->first()->member; 
+            $joinedDate = $member ? $member->created_at->format('d-m-Y') : '-'; 
+            $phone = $member ? $member->phone_number : '-'; 
+            $points = $member ? $member->points : 0; 
+    
             return [
                 'invoice_number' => $invoiceNumber,
                 'subtotal' => $items->sum('subtotal'),
                 'name' => $items->first()->name,
                 'created_at' => $items->first()->created_at,
                 'made_by' => $items->first()->made_by,
-                'product_data' => $items->pluck('product_data')->unique()->implode(', '), // Menambahkan product_data
+                'products' => $products,
+                'phone' => $phone,
+                'poin' => $points, 
+                'joined_date' => $joinedDate, 
             ];
-        })->values(); // Jadi Collection dengan index numerik
-  
-        // Hitung total subtotal
+        })->values();
+    
         $totalSubtotal = $collection->sum('subtotal');
-        
-        // Paginate manual
+    
         $perPage = 10;
         $currentPage = request()->get('page', 1);
         $currentItems = $collection->slice(($currentPage - 1) * $perPage, $perPage)->values();
-        $purchases = new LengthAwarePaginator($currentItems, $collection->count(), $perPage, $currentPage, [
-            'path' => request()->url(),
-            'query' => request()->query(),
-        ]);
-        
+    
+        $purchases = new LengthAwarePaginator(
+            $currentItems,
+            $collection->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+    
         return view('petugas.pembelian.index', compact('purchases', 'totalSubtotal'));
     }
+    
     
     public function create()
     {
@@ -85,14 +122,20 @@ class PembelianController extends Controller
         try {
             $cartData = session('cart_data');
 
+            $request->merge([
+                'price' => (int) str_replace(['.', ','], '', $request->price)
+            ]);
+            
+
             $request->validate([
-                'price' => 'required|integer|min:1',
+                'price' => 'required|integer|min:1|max:1000000000',
+            ],[
+                'price.max' => 'Pembayaran maksimal hanya boleh Rp1.000.000.000',
             ]);
 
             $invoiceNumber = 'INV-' . strtoupper(Str::random(8));
 
             foreach ($cartData as $item) {
-                // Kurangi stok produk
                 $product = Product::find($item['id']);
                 if ($product) {
                     $product->stock -= $item['jumlah'];
@@ -130,32 +173,40 @@ class PembelianController extends Controller
     public function memberPage(Request $request)
     {
         $cartData = session('cart_data');
-
+    
         $sales = Sales::latest()->first();
-
+    
         $members = Member::find($sales->member_id);
-
-        $points = Member::all();
-
-        return view('petugas.pembelian.detail_member', compact('cartData', 'sales', 'members'));
+    
+        $hasPreviousPurchase = Sales::where('member_id', $sales->member_id)
+            ->where('id', '!=', $sales->id)
+            ->exists();
+    
+        return view('petugas.pembelian.detail_member', compact('cartData', 'sales', 'members', 'hasPreviousPurchase'));
     }
-
-    public function receiptMember(){
-        
+    
+    public function receiptMember()
+    {
         $cartData = session('cart_data');
-    
+        
         $sales = Sales::latest()->first();
-    
         $members = Member::latest()->first();
         
         $subtotal = array_sum(array_column($cartData, 'subtotal'));
-
+    
         $points = Member::where('id', $sales->member_id)->value('points');
     
-        $kembalian = $sales->total_paid - $points;
-  
-        return view("petugas.pembelian.receipt_member", compact('cartData', 'sales', 'members', 'kembalian', 'subtotal', 'points'));
+        $kembalian = $sales->total_paid;
+    
+        $usePoints = request()->has('gunakan_poin') && request()->get('gunakan_poin') == '1';
+    
+        if ($usePoints && $points > 0) {
+            $kembalian = $sales->total_paid - $points;
+        }
+    
+        return view("petugas.pembelian.receipt_member", compact('cartData', 'sales', 'members', 'kembalian', 'subtotal', 'points', 'usePoints'));
     }
+    
 
     public function storeMember(Request $request)
     {
@@ -165,9 +216,11 @@ class PembelianController extends Controller
             
             $request->validate([
                 'phone_number' => 'required|string',
-                'price' => 'required|integer|min:1',
+                'price' => 'required|integer|min:1|max:1000000000',
                 'name' => 'nullable|string|max:255',
                 'join_in' => 'nullable|date',
+            ],[
+                'price.max' => 'Pembayaran maksimal hanya boleh Rp1.000.000.000',
             ]);
 
             $member = DB::table('members')->where('phone_number', $request->phone_number)->first();
@@ -233,44 +286,50 @@ class PembelianController extends Controller
     public function simpanMember(Request $request)
     {
         $request->validate([
-            'nama' => 'required|string', // Validasi nama
+            'nama' => 'required|string', 
             'poin' => 'required|numeric',
             'total_bayar' => 'required|numeric',
         ]);
     
-        // Cari member berdasarkan nama
-        $member = Member::where('name', $request->nama)->firstOrFail();
+        $member = Member::find($request->member_id);
+        if (!$member) {
+            return back()->with('error', 'Member tidak ditemukan.');
+        }
     
         $gunakanPoin = $request->has('gunakan_poin');
+    
         $poin_value = 100;
+        $harga_awal = $request->total_bayar;
+        $harga_akhir = $harga_awal;
         $poin_digunakan = 0;
-        $harga_akhir = $request->total_bayar;
     
         if ($gunakanPoin && $member->points > 0) {
-            $potongan = $member->points * $poin_value;
+            $maks_potongan = $member->points * $poin_value;
     
-            if ($potongan >= $harga_akhir) {
-                $poin_digunakan = ceil($harga_akhir / $poin_value);
+            if ($maks_potongan >= $harga_awal) {
+                $poin_digunakan = ceil($harga_awal / $poin_value);
                 $harga_akhir = 0;
             } else {
                 $poin_digunakan = $member->points;
-                $harga_akhir -= $potongan;
+                $harga_akhir = $harga_awal - $maks_potongan;
             }
     
-            // Update points member
             $member->points -= $poin_digunakan;
-            $member->save();
         }
     
-        // Cari sales berdasarkan nama member
-        $sale = Sales::where('name', $member->name)->first();
+        $jumlahTransaksi = Sales::where('member_id', $member->id)->count();
+        if ($jumlahTransaksi <= 1 && $member->name === 'Member Baru') {
+            $member->name = $request->nama;
+        }
     
-        if ($sale) {
-            // Kalau ada transaksi sebelumnya, update total_paid
+        $member->save();
+    
+        $sale = Sales::latest()->first(); 
+    
+        if ($sale && $sale->member_id == $member->id) {
             $sale->total_paid = $harga_akhir;
             $sale->save();
         } else {
-            // Kalau belum ada transaksi, buat transaksi baru
             $sale = new Sales();
             $sale->member_id = $member->id;
             $sale->name = $member->name;
@@ -283,7 +342,6 @@ class PembelianController extends Controller
                          ->with('success', 'Transaksi berhasil disimpan.');
     }
     
-    
     // Export
     public function exportPdf()
     {
@@ -293,16 +351,17 @@ class PembelianController extends Controller
             return redirect()->back()->with('error', 'Tidak ada data transaksi untuk diexport.');
         }
     
-        // Ambil semua data berdasarkan invoice_number
         $sales = Sales::where('invoice_number', $latestInvoice->invoice_number)->get();
     
-        // Ambil member
         $member = null;
+        $points = 0;  // Default points
         if ($latestInvoice->member_id) {
             $member = Member::find($latestInvoice->member_id);
+            if ($member) {
+                $points = $member->points ?? 0;  // Get points from the member table
+            }
         }
     
-        // Ambil semua produk dari product_data
         $cartData = $sales->map(function ($sale) {
             $product = json_decode($sale->product_data, true);
             return [
@@ -315,7 +374,6 @@ class PembelianController extends Controller
         $subtotal = $sales->sum('subtotal');
         $totalPaid = $latestInvoice->total_paid;
         $kembalian = $totalPaid - $subtotal;
-        $points = $latestInvoice->points ?? 0;
     
         $data = [
             'sales' => $latestInvoice,
@@ -336,24 +394,22 @@ class PembelianController extends Controller
         return $pdf->download('invoice_' . $latestInvoice->invoice_number . '.pdf');
     }
     
+    
     public function exportPdfId($id)
     {
-        // Cari data sales berdasarkan ID atau invoice_number
         $sales = Sales::where('invoice_number', $id)->get();
     
         if ($sales->isEmpty()) {
             return redirect()->back()->with('error', 'Data transaksi tidak ditemukan.');
         }
     
-        $latestInvoice = $sales->first(); // ambil salah satu record (semua invoice_number-nya sama)
+        $latestInvoice = $sales->first();
         
-        // Ambil member (jika ada)
         $member = null;
         if ($latestInvoice->member_id) {
             $member = Member::find($latestInvoice->member_id);
         }
     
-        // Ambil semua produk dari product_data
         $cartData = $sales->map(function ($sale) {
             $product = json_decode($sale->product_data, true);
             return [

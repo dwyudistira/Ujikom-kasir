@@ -16,4 +16,9 @@ class Member extends Model
         'join_in',
         'points',
     ];
+
+    public function sales()
+    {
+        return $this->hasMany(Sales::class);
+    }
 }

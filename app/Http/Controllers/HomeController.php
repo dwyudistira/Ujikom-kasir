@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Sales;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -13,7 +12,10 @@ class HomeController extends Controller
     }
 
     public function petugas(){
-        return view('petugas.index');
+        $totalPembelian = Sales::whereDate('created_at', today())
+        ->sum('quantity');
+
+        return view('petugas.index', compact('totalPembelian'));
     }
     public function getChartData()
     {
@@ -26,8 +28,8 @@ class HomeController extends Controller
             ->groupBy('day')
             ->pluck('total', 'day');
     
-        $pieData = Sales::join('products', 'purchases.product_id', '=', 'products.id')
-            ->selectRaw('products.name as product_name, SUM(purchases.quantity) as total')
+        $pieData = Sales::join('products', 'sales.product_id', '=', 'products.id')
+            ->selectRaw('products.name as product_name, SUM(sales.quantity) as total')
             ->groupBy('products.name')
             ->get()
             ->map(function ($item) {

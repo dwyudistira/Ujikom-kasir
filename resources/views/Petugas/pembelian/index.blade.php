@@ -5,8 +5,8 @@
         </h2>
     </x-slot>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50">
+        <div class="bg-white shadow-xl sm:rounded-lg p-6">
             @if(session('success'))
                 <div class="mb-6 p-4 bg-green-50 text-green-700 rounded-lg font-medium">
                     {{ session('success') }}
@@ -30,22 +30,53 @@
                 </div>
             </div>
 
+            <form method="GET" action="{{ route('petugas.pembelian') }}" class="space-x-3 mb-6">
+                <div class="flex space-x-2">
+                    <select name="day" class="form-select rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Hari</option>
+                        @for($i = 1; $i <= 31; $i++)
+                            <option value="{{ $i }}" {{ request('day') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                        @endfor
+                    </select>
+
+                    <select name="month" class="form-select rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Bulan</option>
+                        @foreach(range(1, 12) as $month)
+                            <option value="{{ $month }}" {{ request('month') == $month ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $month, 10)) }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="year" class="form-select rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Tahun</option>
+                        @foreach(range(date('Y') - 5, date('Y')) as $year)
+                            <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                        @endforeach
+                    </select>
+
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition">
+                        Filter
+                    </button>
+                </div>
+            </form>
+
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-200 bg-white shadow-sm rounded-md">
+                    <thead class="bg-gray-100">
                         <tr>
-                            <th>#</th>
-                            <th>Nama Pelanggan</th>
-                            <th>Tanggal</th>
-                            <th>Total Harga</th>
-                            <th>Dibuat Oleh</th>
-                            <th>Aksi</th>
+                            <th class="px-6 py-4 text-sm text-gray-600">#</th>
+                            <th class="px-6 py-4 text-sm text-gray-600">No. Invoice</th>
+                            <th class="px-6 py-4 text-sm text-gray-600">Nama Pelanggan</th>
+                            <th class="px-6 py-4 text-sm text-gray-600">Tanggal</th>
+                            <th class="px-6 py-4 text-sm text-gray-600">Total Harga</th>
+                            <th class="px-6 py-4 text-sm text-gray-600">Dibuat Oleh</th>
+                            <th class="px-6 py-4 text-sm text-gray-600">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($purchases as $purchase)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4">{{ $loop->iteration }}</td>
+                            <td class="px-6 py-4">{{ $purchase['invoice_number'] }}</td>
                             <td class="px-6 py-4">{{ $purchase['name'] }}</td>
                             <td class="px-6 py-4">{{ $purchase['created_at']->format('d-m-Y') }}</td>
                             <td class="px-6 py-4">Rp {{ number_format($purchase['subtotal'], 0, ',', '.') }}</td>
@@ -53,15 +84,17 @@
                             <td class="px-6 py-4">
                                 <div class="flex space-x-2">
                                     <button
-                                        type="button"
+                                    type="button"
                                         class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md text-sm flex items-center"
                                         data-bs-toggle="modal"
                                         data-bs-target="#detailPenjualanModal"
                                         data-name="{{ $purchase['name'] }}"
-                                        data-phone="0812345678903"
-                                        data-poin="32000"
+                                        data-phone="{{ $purchase['phone'] }}"
+                                        data-poin="{{ $purchase['poin'] }}" 
                                         data-date="{{ $purchase['created_at']->format('d-m-Y H:i:s') }}"
                                         data-user="{{ $purchase['made_by'] }}"
+                                        data-products='@json($purchase["products"])'
+                                        data-joined-date="{{ $purchase['joined_date'] }}"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -69,6 +102,7 @@
                                         </svg>
                                         Lihat
                                     </button>
+
                                     <a href="{{ route('petugas.pembelian.export-pdf-id', $purchase['invoice_number']) }}" class="text-amber-600 hover:text-amber-900 bg-amber-50 px-3 py-1 rounded-md text-sm flex items-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -99,10 +133,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="d-flex justify-content-between">
-                        <p><strong>Poin Member:</strong> </p>
-                        <p><strong>Bergabung Sejak:</strong> <span>21 Februari 2025</span></p>
-                    </div>
-                    <p><strong>No. HP:</strong> <span id="modal-phone"></span></p>
+                    <p><strong>Poin Member:</strong> <span id="modal-poin">-</span></p>
+                    <p><strong>Bergabung Sejak:</strong> <span id="modal-joined-date">-</span></p>
+                </div>
+                <p><strong>No. HP:</strong> <span id="modal-phone">-</span></p>
 
                     <table class="table mt-3">
                         <thead>
@@ -113,18 +147,13 @@
                                 <th>Sub Total</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Anjing Peliharaan</td>
-                                <td>1</td>
-                                <td>Rp. 3.200.000</td>
-                                <td>Rp. 3.200.000</td>
-                            </tr>
+                        <tbody id="modal-product-body">
+                            <!-- Data produk akan diisi JS -->
                         </tbody>
                     </table>
 
                     <div class="text-end mt-3">
-                        <strong>Total:</strong> <span>Rp. 3.200.000</span>
+                        <strong>Total:</strong> <span id="modal-total">Rp 0</span>
                     </div>
                     <div class="text-xs text-gray-500 mt-4 text-center">
                         <p>Dibuat pada: <span id="modal-date"></span></p>
@@ -138,7 +167,42 @@
         </div>
     </div>
 
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const detailModal = document.getElementById('detailPenjualanModal');
+        detailModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const products = JSON.parse(button.getAttribute('data-products') || '[]');
+            const name = button.getAttribute('data-name');
+            const phone = button.getAttribute('data-phone');
+            const poin = button.getAttribute('data-poin');
+            const date = button.getAttribute('data-date');
+            const user = button.getAttribute('data-user');
+            const joinedDate = button.getAttribute('data-joined-date');
+            
+            document.getElementById('modal-poin').textContent = poin || '-';
+            document.getElementById('modal-joined-date').textContent = joinedDate || '-';
+            document.getElementById('modal-phone').textContent = phone || '-';
+            document.getElementById('modal-date').textContent = date || '-';
+            document.getElementById('modal-user').textContent = user || '-';
+
+            let total = 0;
+            let productRows = '';
+            products.forEach(product => {
+                total += product.sub_total;
+                productRows += `
+                    <tr>
+                        <td>${product.name}</td>
+                        <td>${product.qty}</td>
+                        <td>Rp ${product.price}</td>
+                        <td>Rp ${product.sub_total}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('modal-product-body').innerHTML = productRows;
+            document.getElementById('modal-total').textContent = `Rp ${total.toLocaleString()}`;
+        });
+    </script>
 </x-app-layout>

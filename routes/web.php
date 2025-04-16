@@ -29,14 +29,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
      Route::put('/admin/pembelian-update', [PembelianController::class, "update"])->name("admin.pembelian.update");
      Route::delete('/admin/pembelian-destroy', [PembelianController::class, "destroy"])->name("admin.pembelian.destroy");
      Route::get('/admin/export-pembelian', [PembelianController::class, 'export'])->name('admin.pembelian.export');
-
+     Route::get('/export-pdf/{id}', [PembelianController::class, 'exportPdfId'])->name('admin.pembelian.export-pdf-id');
     //produk 
     route::get('/admin/produk',[ProdukController::class, 'index'])->name('admin.product');
     route::get('/admin/produk/create',[ProdukController::class, 'create'])->name('admin.product.create');
     route::post('/admin/produk/store',[ProdukController::class, 'store'])->name('admin.product.store');
     route::get('/admin/produk/edit/{id}',[ProdukController::class, 'edit'])->name('admin.product.edit');
     route::put('/admin/produk/update/{id}',[ProdukController::class, 'update'])->name('admin.product.update');
-    route::put('/admin/produk/update/stock',[ProdukController::class, 'updateStock'])->name('admin.product.updateStock');
+    route::put('/admin/produk/updateStock',[ProdukController::class, 'updateStock'])->name('admin.product.updateStock');
     route::delete('/admin/produk/delete/{id}',[ProdukController::class, 'destroy'])->name('admin.product.destroy');
     
     //user 
@@ -50,7 +50,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 Route::middleware(['auth', 'petugas'])->group(function () {
     //Dashboard
-    Route::get('/petugas/home', [HomeController::class, 'petugas'])->name('petugas.dashboard');
+    Route::get('/petugas/dahboard', [HomeController::class, 'petugas'])->name('petugas.dashboard');
 
     //pembelian
     Route::get('/petugas/pembelian', [PetugasPembelianController::class, "index"])->name("petugas.pembelian");

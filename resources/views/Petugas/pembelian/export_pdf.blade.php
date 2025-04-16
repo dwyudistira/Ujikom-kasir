@@ -1,243 +1,147 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>INVOICE</title>
     <style>
-        /* Reset dan base styling */
         body {
-            font-family: 'DejaVu Sans', sans-serif;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
             color: #333;
             line-height: 1.6;
-            padding: 20px;
         }
-        
-        /* Container utama */
         .invoice-container {
             max-width: 800px;
             margin: 0 auto;
-            background: white;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        
-        /* Header */
-        .invoice-header {
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #1a237e;
+            padding-bottom: 20px;
+        }
+        .logo {
+            max-width: 150px;
+        }
+        .company-info {
+            text-align: right;
+        }
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a237e;
+            margin-bottom: 5px;
+        }
+        .invoice-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1a237e;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .details {
             display: flex;
             justify-content: space-between;
             margin-bottom: 30px;
         }
-        
-        .invoice-title {
-            font-size: 28px;
+        .client-info, .invoice-info {
+            width: 48%;
+        }
+        .section-title {
+            font-size: 18px;
             font-weight: bold;
-            color: #2d3748;
+            color: #1a237e;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
         }
-        
-        .invoice-number {
-            background: #ebf8ff;
-            color: #2b6cb0;
-            font-size: 14px;
-            font-weight: 600;
-            padding: 3px 12px;
-            border-radius: 9999px;
-            display: inline-block;
-        }
-        
-        .invoice-date {
-            color: #718096;
-            margin-left: 15px;
-        }
-        
-        /* Garis pemisah */
-        .divider {
-            border-top: 2px solid #e2e8f0;
-            border-bottom: 2px solid #e2e8f0;
-            height: 4px;
-            margin: 20px 0;
-        }
-        
-        /* Tabel produk */
-        .product-table {
+        table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 30px;
         }
-        
-        .product-table th {
+        th {
+            background-color: #1a237e;
+            color: white;
+            padding: 10px;
             text-align: left;
-            padding-bottom: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #4a5568;
-            border-bottom: 2px solid #e2e8f0;
         }
-        
-        .product-table td {
-            padding: 12px 0;
-            border-bottom: 1px solid #edf2f7;
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
         }
-        
-        .product-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .text-right {
+        .total {
+            font-weight: bold;
+            font-size: 18px;
             text-align: right;
         }
-        
-        /* Info box */
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .info-box {
-            background: #ebf8ff;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #bee3f8;
-        }
-        
-        .info-box-gray {
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .info-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #4a5568;
-            margin-bottom: 5px;
-        }
-        
-        .info-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2b6cb0;
-        }
-        
-        .info-value-gray {
-            color: #2d3748;
-        }
-        
-        /* Total box */
-        .total-box {
-            background: #f7fafc;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        
-        .total-label {
-            font-size: 18px;
-            font-weight: 500;
-            color: #4a5568;
-        }
-        
-        .total-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2b6cb0;
-        }
-        
-        /* Footer */
-        .invoice-footer {
-            text-align: center;
+        .footer {
             margin-top: 30px;
-            color: #718096;
-            font-size: 14px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 20px;
         }
-        
-        /* Utility classes */
-        .font-bold {
-            font-weight: bold;
-        }
-        
-        .text-blue-600 {
-            color: #3182ce;
-        }
-        
-        .text-gray-800 {
-            color: #2d3748;
+        .highlight {
+            color: #d4af37; /* Gold */
         }
     </style>
 </head>
 <body>
     <div class="invoice-container">
-        <!-- Header -->
-        <div class="invoice-header">
-            <div>
-                <h1 class="invoice-title">INVOICE</h1>
-                <div style="margin-top: 10px;">
-                    <span class="invoice-number">#{{ $sales['invoice_number'] }}</span>
-                    <span class="invoice-date">{{ $sales['date'] }}</span>
-                </div>
+            <div class="company-info">
+                <div class="company-name">Yudistira Gadget</div>
+                <div>Jl. Raya Puncak No 2 </div>
+                <div>Kabupaten Bogor, 321092</div>
+                <div>Email: <span class="highlight">gadgetkuy@sangkuriang.id</span></div>
+                <div>Telp: <span class="highlight">(021) 1234-5678</span></div>
             </div>
         </div>
-        
-        <!-- Divider -->
-        <div class="divider"></div>
-        
-        <!-- Product Table -->
-        <table class="product-table">
+
+        <div class="invoice-title">INVOICE</div>
+
+        <div class="details">
+            <div class="invoice-info">
+                <div class="section-title">Detail Invoice:</div>
+                <div>No. Invoice: <strong>{{ $sales->invoice_number }}</strong></div>
+                <div>Tanggal: {{ $sales->created_at->format('d F Y H:i') }}</div>
+                <div>Poin Didapat: {{ $points }}</div>
+            </div>
+        </div>
+
+        <table>
             <thead>
                 <tr>
                     <th>Produk</th>
-                    <th class="text-right">Harga</th>
-                    <th class="text-right">Quantity</th>
-                    <th class="text-right">Sub Total</th>
+                    <th>Jumlah</th>
+                    <th>Harga Satuan</th>
+                    <th>Subtotal</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($cartData as $item)
                 <tr>
-                    <td class="font-bold text-gray-800">{{ $item['nama'] }}</td>
-                    <td class="text-right">Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</td>
-                    <td class="text-right">{{ $item['jumlah'] }}</td>
-                    <td class="text-right text-blue-600 font-bold">Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</td>
+                    <td>{{ $item['nama'] }}</td>
+                    <td>{{ $item['jumlah'] }}</td>
+                    <td>Rp {{ number_format($item['subtotal'] / $item['jumlah'], 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
-        
-        <!-- Info Grid -->
-        <div class="info-grid">
-            <div class="info-box">
-                <div class="info-label">POIN DIGUNAKAN</div>
-                <div class="info-value">{{ number_format($points, 0, ',', '.') }}</div>
-            </div>
-            <div class="info-box info-box-gray">
-                <div class="info-label">KASIR</div>
-                <div class="info-value info-value-gray">{{ $user['name'] }}</div>
-            </div>
+
+        <div class="total">
+            <div>Subtotal: Rp {{ number_format($subtotal, 0, ',', '.') }}</div>
+            <div>Total Bayar: Rp {{ number_format($totalPaid, 0, ',', '.') }}</div>
+            <div>Kembalian: <span class="highlight">Rp {{ number_format($kembalian, 0, ',', '.') }}</span></div>
         </div>
-        
-        <!-- Total Box -->
-        <div class="total-box">
-            <div class="total-row">
-                <span class="total-label">REMBALLAN</span>
-                <span class="total-label">Rp {{ number_format($kembalian, 0, ',', '.') }}</span>
-            </div>
-            <div class="total-row" style="padding-top: 15px; border-top: 1px solid #e2e8f0;">
-                <span class="total-label">TOTAL</span>
-                <span class="total-value">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
-            </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="invoice-footer">
-            <p>Terima kasih telah berbelanja bersama kami</p>
-            <p style="margin-top: 5px;">Invoice ini sah dan diproses oleh sistem</p>
+
+        <div class="footer">
+            <div>Terima kasih telah berbelanja di toko kami!</div>
+            <div>Barang yang sudah dibeli tidak dapat dikembalikan</div>
+            <div>Jika ada pertanyaan, hubungi (021) 1234-5678</div>
         </div>
     </div>
 </body>

@@ -19,10 +19,8 @@
             </div>
         </div>
 
-        <!-- Garis pemisah dekoratif -->
         <div class="border-t-2 border-b-2 border-gray-200 py-1 my-6"></div>
 
-        <!-- Tabel produk yang lebih elegan -->
         <div class="mb-8 overflow-x-auto">
             <table class="w-full">
                 <thead>
@@ -42,16 +40,16 @@
                             <td class="text-right text-blue-600 font-semibold">Rp. {{ number_format($item['subtotal'], 0, ',', '.') }}</td>
                         @endforeach
                     </tr>
-                    <!-- Baris tambahan produk bisa ditambahkan di sini -->
                 </tbody>
             </table>
         </div>
 
-        <!-- Informasi pembayaran dalam card -->
         <div class="grid grid-cols-2 gap-6 mb-8">
             <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
                 <p class="text-sm font-medium text-blue-800 mb-1">POIN DIGUNAKAN</p>
-                <p class="text-2xl font-bold text-blue-600">{{ number_format($points, 0, ',', '.')}}</p>
+                <p class="text-2xl font-bold text-blue-600">
+                    {{ $usePoints && $points > 0 ? number_format($points, 0, ',', '.') : '0' }}
+                </p>
             </div>
             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-right">
                 <p class="text-sm font-medium text-gray-700 mb-1">KASIR</p>
@@ -59,7 +57,6 @@
             </div>
         </div>
 
-        <!-- Total pembayaran yang menonjol -->
         <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
             <div class="flex justify-between items-center mb-3">
                 <span class="text-lg font-medium text-gray-700">REMBALLAN</span>
@@ -71,7 +68,6 @@
             </div>
         </div>
 
-        <!-- Footer invoice -->
         <div class="mt-8 text-center text-sm text-gray-500">
             <p>Terima kasih telah berbelanja bersama kami</p>
             <p class="mt-1">Invoice ini sah dan diproses oleh sistem</p>
@@ -79,17 +75,14 @@
     </div>
 
     <style>
-        /* Animasi halus untuk hover */
         button {
             transition: all 0.2s ease-in-out;
         }
         
-        /* Efek saat tombol diklik */
         button:active {
             transform: scale(0.98);
         }
         
-        /* Tampilan untuk print */
         @media print {
             button {
                 display: none !important;

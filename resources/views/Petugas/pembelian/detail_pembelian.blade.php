@@ -67,7 +67,6 @@
         const form = document.getElementById("checkout-form");
         const submitButton = document.getElementById("pesan");
         
-        // Get CSRF token - try multiple ways to be safe
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
                         document.head.querySelector('meta[name="csrf-token"]')?.content ||
                         '{{ csrf_token() }}';
@@ -78,23 +77,19 @@
             return;
         }
 
-        // Toggle member form visibility
         memberStatusSelect.addEventListener("change", function () {
             memberForm.classList.toggle("hidden", this.value !== "member");
         });
 
-        // Form submission handler
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
             
-            // Validate price
             const price = document.getElementById("price").value;
             if (!price || price === "0") {
                 alert("Harga harus diisi sebelum melanjutkan!");
                 return false;
             }
 
-            // Disable button during submission
             const originalText = submitButton.innerHTML;
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="animate-spin">⏳</span> Memproses...';
@@ -107,7 +102,6 @@
                 
                 const formData = new FormData(form);
                 
-                // For debugging - log form data
                 console.log('Submitting form data:', Object.fromEntries(formData));
 
                 const response = await fetch(url, {
@@ -120,7 +114,6 @@
                     }
                 });
 
-                // Handle response
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.message || 'Terjadi kesalahan server');

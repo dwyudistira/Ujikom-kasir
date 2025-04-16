@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
 class Sales extends Model
 {
-    //
     protected $fillable = [
         'invoice_number',
         'name',
@@ -19,4 +22,15 @@ class Sales extends Model
         'total_paid',
         'made_by',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function member()
+    {
+        return $this->belongsTo(Member::class);
+    }
 }
+

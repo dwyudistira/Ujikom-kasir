@@ -12,42 +12,48 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class SalesExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $groupedSales;
+    protected $members;
 
-    public function __construct()
+    public function __construct(Collection $filteredSales)
     {
-        // Group Sales by invoice_number
-        $allSales = Sales::all();
-        $this->groupedSales = $allSales->groupBy('invoice_number');
+        // Gunakan hanya data yang sudah difilter
+        $this->groupedSales = $filteredSales->groupBy('invoice_number');
+    
+        // Preload semua member untuk menghindari N+1
+        $this->members = Member::all()->keyBy('id');
     }
+    
 
     public function collection()
     {
-        // Flatten the grouped collection into just one per invoice
+        // Ambil satu sales per invoice untuk representasi baris export
         return $this->groupedSales->map(function ($items) {
-            return $items->first(); // Ambil satu sales item per invoice (untuk map-nya)
-        })->values(); // supaya clean index
+            return $items->first();
+        })->values();
     }
 
     public function map($sale): array
     {
-        // Ambil semua sale berdasarkan invoice_number
+        // Ambil semua sales untuk invoice yang sama
         $salesByInvoice = $this->groupedSales[$sale->invoice_number];
 
-        // Ambil member info
-        $member = $sale->member_id ? Member::find($sale->member_id) : null;
+        // Ambil data member dari koleksi preload
+        $member = $this->members[$sale->member_id] ?? null;
 
         // Format produk
         $produkStr = '';
         foreach ($salesByInvoice as $item) {
             $product = json_decode($item->product_data, true);
-            if (is_array($product)) {
+            if (json_last_error() === JSON_ERROR_NONE && is_array($product)) {
                 $nama = $product['nama'] ?? 'Produk';
                 $jumlah = $product['jumlah'] ?? 0;
                 $subtotal = $product['subtotal'] ?? 0;
-                $produkStr .= "{$nama} ( {$jumlah} : Rp. " . number_format($subtotal, 0, ',', '.') . " ) , ";
+                $produkStr .= "{$nama} ( {$jumlah} : Rp. " . number_format($subtotal, 0, ',', '.') . " ), ";
             }
         }
+        $produkStr = rtrim($produkStr, ', ');
 
+        // Hitung total
         $subtotal = $salesByInvoice->sum('subtotal');
         $totalPaid = $sale->total_paid ?? 0;
         $diskonPoin = $sale->total_discount ?? 0;

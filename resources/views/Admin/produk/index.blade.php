@@ -7,7 +7,6 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-            <!-- Success/Error Messages -->
             @if(session('success'))
                 <script>
                     document.addEventListener("DOMContentLoaded", function() {
@@ -42,7 +41,6 @@
                 </script>
             @endif
 
-            <!-- Header with Add Product Button -->
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800">Manajemen Produk</h3>
@@ -56,7 +54,6 @@
                 </a>
             </div>
 
-            <!-- Products Table -->
             <div class="overflow-x-auto rounded-lg border border-gray-200">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -187,7 +184,6 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Modal Update Stok
         var updateStockModal = document.getElementById('updateStockModal');
         updateStockModal.addEventListener('show.bs.modal', function(event) {
             var button = event.relatedTarget;
@@ -200,7 +196,6 @@
             document.getElementById('product_stock').value = productStock;
         });
 
-        // SweetAlert untuk konfirmasi hapus
         document.querySelectorAll('.delete-button').forEach(button => {
             button.addEventListener('click', function() {
                 var form = this.closest('form');
@@ -237,7 +232,6 @@
     });
     </script>
 
-    <!-- External Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-2xl text-gray-900 leading-tight">
-            {{ __('🛒 Update Produk') }}
+            {{ __('Update Produk') }}
         </h2>
     </x-slot>
 
@@ -68,10 +68,10 @@
 
     <script>
         document.getElementById('price_display').addEventListener('input', function (e) {
-            let value = this.value.replace(/\D/g, ""); // Hapus semua karakter non-angka
-            let formatted = new Intl.NumberFormat('id-ID').format(value); // Format angka (Indonesia)
-            this.value = formatted; // Update tampilan dengan format
-            document.getElementById('price').value = value; // Simpan angka murni di input hidden
+            let value = this.value.replace(/\D/g, ""); 
+            let formatted = new Intl.NumberFormat('id-ID').format(value); 
+            this.value = formatted; 
+            document.getElementById('price').value = value; 
         });
     </script>
 </x-app-layout>

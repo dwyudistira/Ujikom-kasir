@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedInteger("quantity");
             $table->string("subtotal");
             $table->string("diskon_member")->default(0);
-            $table->string("total_paid");
+            $table->bigInteger("total_paid");
             $table->string("made_by");
             $table->timestamps();
         });

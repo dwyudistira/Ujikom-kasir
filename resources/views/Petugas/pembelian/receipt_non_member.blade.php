@@ -10,19 +10,17 @@
                 </div>
             </div>
             <div class="flex space-x-3">
-                <button class="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                <a href="{{ route('petugas.pembelian.export-pdf') }}" class="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Unduh
-                </button>
+                </a href="{{ route('petugas.pembelian.export-pdf') }}">
             </div>
         </div>
 
-        <!-- Garis pemisah dekoratif -->
         <div class="border-t-2 border-b-2 border-gray-200 py-1 my-6"></div>
 
-        <!-- Tabel produk yang lebih elegan -->
         <div class="mb-8 overflow-x-auto">
             <table class="w-full">
                 <thead>
@@ -42,12 +40,10 @@
                             <td class="text-right text-blue-600 font-semibold">Rp. {{ number_format($item['subtotal'], 0, ',', '.') }}</td>
                         @endforeach
                     </tr>
-                    <!-- Baris tambahan produk bisa ditambahkan di sini -->
                 </tbody>
             </table>
         </div>
 
-        <!-- Informasi pembayaran dalam card -->
         <div class="grid grid-cols-2 gap-6 mb-8">
             <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
                 <p class="text-sm font-medium text-blue-800 mb-1">POIN DIGUNAKAN</p>
@@ -59,7 +55,6 @@
             </div>
         </div>
 
-        <!-- Total pembayaran yang menonjol -->
         <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
             <div class="flex justify-between items-center mb-3">
                 <span class="text-lg font-medium text-gray-700">REMBALLAN</span>
@@ -71,7 +66,6 @@
             </div>
         </div>
 
-        <!-- Footer invoice -->
         <div class="mt-8 text-center text-sm text-gray-500">
             <p>Terima kasih telah berbelanja bersama kami</p>
             <p class="mt-1">Invoice ini sah dan diproses oleh sistem</p>
@@ -79,17 +73,14 @@
     </div>
 
     <style>
-        /* Animasi halus untuk hover */
         button {
             transition: all 0.2s ease-in-out;
         }
         
-        /* Efek saat tombol diklik */
         button:active {
             transform: scale(0.98);
         }
         
-        /* Tampilan untuk print */
         @media print {
             button {
                 display: none !important;

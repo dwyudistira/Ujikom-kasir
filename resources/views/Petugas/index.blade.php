@@ -7,7 +7,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <!-- Sales Summary -->
             <div class="bg-white shadow-md rounded-lg p-6 text-gray-900 w-full md:w-[980px] mx-auto">
                 <h2 class="text-xl font-semibold text-gray-900 text-center">Selamat Datang, Petugas!</h2>
                 

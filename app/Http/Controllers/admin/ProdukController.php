@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProdukController extends Controller
 {
-    //
     public function index(){
         $products = Product::paginate(10);
 
@@ -20,7 +20,7 @@ class ProdukController extends Controller
     }
 
     public function store(Request $request)
-    {   
+    {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',  
@@ -28,13 +28,10 @@ class ProdukController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // if ($request->hasFile('image')) {
-            $file = $request->file('image') ;
-            $fileName = $file->getClientOriginalName() ;
-            $destinationPath = public_path().'/images' ;
-            dd($file->move($destinationPath,$fileName));
-        // }        
-
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('product', 'public'); 
+        }
+    
         Product::create($validated);
     
         return redirect()->route('admin.product')->with('success', 'Produk berhasil ditambahkan');
@@ -46,20 +43,31 @@ class ProdukController extends Controller
         return view('admin.produk.edit', compact('products'));
     }
 
-    public function update(Request $request, $id){
-        $data = Product::find($id);
-
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+    
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'price' => 'required|integer',
+            'price' => 'required|numeric',
             'stock' => 'required|integer',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+    
+        if ($request->hasFile('image')) {
 
-        $data->update($validated);
-
-        return redirect()->route('admin.product');
+            if ($product->image && Storage::disk('public')->exists($product->image)) {
+                Storage::disk('public')->delete($product->image);
+            }
+    
+            $validated['image'] = $request->file('image')->store('product', 'public');
+        }
+    
+        $product->update($validated);
+    
+        return redirect()->route('admin.product')->with('success', 'Produk berhasil diperbarui');
     }
+
     public function updateStock(Request $request)
     {
         $request->validate([

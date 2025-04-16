@@ -12,7 +12,6 @@
             </div>
         @endif
 
-        <!-- Penjelasan di atas form -->
     <div class="mb-8">
         <h3 class="text-2xl font-bold text-gray-800 mb-2">Tambah Produk</h3>
     </div>
@@ -22,7 +21,6 @@
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Nama Produk -->
                 <div>
                     <label for="name" class="block text-sm font-bold text-gray-700 mb-2">Nama Produk</label>
                     <input type="text" name="name" value="{{ old('name') }}" required
@@ -30,7 +28,6 @@
                     @error('name') <p class="text-red-500 text-sm mt-2">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- Harga Produk -->
                 <div>
                     <label for="price_display" class="block text-sm font-bold text-gray-700 mb-2">Harga</label>
                     <div class="relative">
@@ -42,7 +39,6 @@
                     @error('price') <p class="text-red-500 text-sm mt-2">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- Stok Produk -->
                 <div>
                     <label for="stock" class="block text-sm font-bold text-gray-700 mb-2">Stok</label>
                     <input type="number" name="stock" value="{{ old('stock') }}" required min="1"
@@ -50,7 +46,6 @@
                     @error('stock') <p class="text-red-500 text-sm mt-2">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- Gambar Produk -->
                 <div>
                     <label for="image" class="block text-sm font-bold text-gray-700 mb-2">Gambar Produk</label>
                     <input type="file" name="image" accept="image/*"
@@ -59,7 +54,6 @@
                 </div>
             </div>
 
-            <!-- Tombol Submit -->
             <div class="pt-4">
                 <button type="submit"
                     class="w-full bg-indigo-600 text-white text-lg font-semibold py-3 px-6 rounded-xl hover:bg-indigo-700 transition duration-300 ease-in-out shadow-md">
