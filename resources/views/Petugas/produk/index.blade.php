@@ -42,14 +42,12 @@
                 </script>
             @endif
 
-            <!-- Header with Add Product Button -->
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800">Manajemen Produk</h3>
                 </div>
             </div>
 
-            <!-- Products Table -->
             <div class="overflow-x-auto rounded-lg border border-gray-200">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -78,7 +76,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ $product->name }}</div>
-                                <div class="text-xs text-gray-500 mt-1">ID: {{ $product->id }}</div>
+                                <div class="text-xs text-gray-500 mt-1">ID: {{ $product->stock }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                                 Rp{{ number_format($product->price, 0, ',', '.') }}
@@ -101,7 +99,6 @@
         </div>
     </div>
 
-    <!-- External Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

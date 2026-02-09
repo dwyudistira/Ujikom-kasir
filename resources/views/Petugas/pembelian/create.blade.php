@@ -1,4 +1,5 @@
 <x-app-layout>
+    {{-- Alert Messages --}}
     @if(session('success'))
         <div class="alert alert-success text-center">
             {{ session('success') }}
@@ -10,6 +11,7 @@
         </div>
     @endif
 
+    {{-- Products Grid --}}
     <div class="container mt-4">
         <div class="row justify-content-center">
             @foreach ($products as $product)
@@ -26,18 +28,32 @@
                                 <span>No Image</span>
                             </div>
                         @endif
+
                         <div class="card-body">
                             <h5 class="card-title">{{ $product->name }}</h5>
                             <p class="text-muted">Stok: <span id="stok-{{ $product->id }}">{{ $product->stock }}</span></p>
                             <p class="fw-bold text-primary">Rp. {{ number_format($product->price, 0, ',', '.') }}</p>
 
-                            <div class="d-flex align-items-center justify-content-center">
-                                <button class="btn btn-sm me-2" onclick="kurangi({{ $product->id }}, {{ $product->price }}, '{{ $product->name }}')" type="button">-</button>
-                                <span id="jumlah-{{ $product->id }}" class="fw-bold">0</span>
-                                <button class="btn btn-sm ms-2" onclick="tambah({{ $product->id }}, {{ $product->price }}, '{{ $product->name }}')" type="button">+</button>
+                            <div class="d-flex justify-content-center align-items-center mb-2">
+                                <button
+                                    id="btn-minus-{{ $product->id }}"
+                                    class="btn-control"
+                                    onclick="kurangi({{ $product->id }}, {{ $product->price }}, '{{ $product->name }}')"
+                                    type="button"
+                                    disabled
+                                >-</button>
+
+                                <span id="jumlah-{{ $product->id }}" class="fw-bold mx-2">0</span>
+
+                                <button
+                                    id="btn-plus-{{ $product->id }}"
+                                    class="btn-control"
+                                    onclick="tambah({{ $product->id }}, {{ $product->price }}, '{{ $product->name }}')"
+                                    type="button"
+                                >+</button>
                             </div>
 
-                            <p class="mt-2">Sub Total: <strong>Rp. <span id="subtotal-{{ $product->id }}">0</span></strong></p>
+                            <p>Sub Total: <strong>Rp. <span id="subtotal-{{ $product->id }}">0</span></strong></p>
                         </div>
                     </div>
                 </div>
@@ -45,43 +61,85 @@
         </div>
     </div>
 
-    <div class="text-center mt-4">
-        <form id="cartForm" method="POST" action="{{ route('petugas.pembelian.detail') }}">
-            @csrf
-            <input type="hidden" name="cart_data" id="cartData">
-            <button type="submit" onclick="kirimDataKeHalamanBerikutnya()" class="btn btn-primary">Selanjutnya</button>
-        </form>
+    {{-- Checkout Sticky Section --}}
+    <div id="checkout-sticky">
+        <div class="text-center mt-4">
+            <h5>Total Pembelian</h5>
+            <h4 class="fw-bold text-success">Rp. <span id="grandTotal">0</span></h4>
+        </div>
+
+        <div class="text-center mt-4">
+            <form id="cartForm" method="POST" action="{{ route('petugas.pembelian.detail') }}">
+                @csrf
+                <input type="hidden" name="cart_data" id="cartData">
+                <button type="submit" onclick="kirimDataKeHalamanBerikutnya()" class="btn btn-primary">
+                    Selanjutnya
+                </button>
+            </form>
+        </div>
     </div>
 
     <script>
-        let cart = {}; 
+        let cart = {};
+
+        function hitungTotal() {
+            let total = 0;
+            Object.values(cart).forEach(item => total += item.subtotal);
+            document.getElementById("grandTotal").textContent = total.toLocaleString("id-ID");
+        }
+
+        function updateButtonState(id) {
+            const jumlah = parseInt(document.getElementById("jumlah-" + id).textContent);
+            const stok = parseInt(document.getElementById("stok-" + id).textContent);
+
+            document.getElementById("btn-minus-" + id).disabled = jumlah === 0;
+            document.getElementById("btn-plus-" + id).disabled = jumlah >= stok;
+        }
 
         function tambah(id, harga, nama) {
+            let stok = parseInt(document.getElementById("stok-" + id).textContent);
             let jumlahSpan = document.getElementById("jumlah-" + id);
             let subtotalSpan = document.getElementById("subtotal-" + id);
-            let jumlah = parseInt(jumlahSpan.textContent) + 1;
 
+            let jumlah = parseInt(jumlahSpan.textContent);
+            if (jumlah >= stok) return;
+
+            jumlah++;
             jumlahSpan.textContent = jumlah;
-            subtotalSpan.textContent = (jumlah * harga).toLocaleString("id-ID");
-            
-            cart[id] = { id, nama, jumlah, subtotal: jumlah * harga };
+
+            let subtotal = jumlah * harga;
+            subtotalSpan.textContent = subtotal.toLocaleString("id-ID");
+
+            cart[id] = { id, nama, jumlah, subtotal };
             localStorage.setItem("cart", JSON.stringify(cart));
+
+            updateButtonState(id);
+            hitungTotal();
         }
 
         function kurangi(id, harga, nama) {
             let jumlahSpan = document.getElementById("jumlah-" + id);
             let subtotalSpan = document.getElementById("subtotal-" + id);
-            let jumlah = Math.max(0, parseInt(jumlahSpan.textContent) - 1);
 
+            let jumlah = parseInt(jumlahSpan.textContent);
+            if (jumlah <= 0) return;
+
+            jumlah--;
             jumlahSpan.textContent = jumlah;
-            subtotalSpan.textContent = (jumlah * harga).toLocaleString("id-ID");
+
+            let subtotal = jumlah * harga;
+            subtotalSpan.textContent = subtotal.toLocaleString("id-ID");
 
             if (jumlah === 0) {
                 delete cart[id];
             } else {
-                cart[id] = { id, nama, jumlah, subtotal: jumlah * harga };
+                cart[id] = { id, nama, jumlah, subtotal };
             }
+
             localStorage.setItem("cart", JSON.stringify(cart));
+
+            updateButtonState(id);
+            hitungTotal();
         }
 
         function kirimDataKeHalamanBerikutnya() {
@@ -89,5 +147,22 @@
         }
     </script>
 
+    {{-- Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </x-app-layout>
+
+<style>
+    #checkout-sticky {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 10;
+        padding-bottom: 15px;
+    }
+    .btn-control {
+        width: 35px;
+        height: 35px;
+        padding: 0;
+        font-size: 1.2rem;
+    }
+</style>

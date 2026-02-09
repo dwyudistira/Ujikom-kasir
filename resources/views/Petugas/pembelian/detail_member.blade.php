@@ -2,6 +2,7 @@
     <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-10 border border-gray-200">
         <div class="flex-1 border border-gray-200 p-6 rounded-xl bg-gray-50">
             <h2 class="text-2xl font-bold text-gray-700 mb-4">Ringkasan Produk</h2>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="border-b">
@@ -17,62 +18,117 @@
                             <tr>
                                 <td class="py-2">{{ $data['nama'] }}</td>
                                 <td>{{ $data['jumlah'] }}</td>
-                                <td>{{ number_format($data['subtotal'], 0, ',', '.') }}</td>
-                                <td>{{ number_format($data['subtotal'], 0, ',', '.') }}</td>
+                                <td>Rp. {{ number_format($data['subtotal'],0,',','.') }}</td>
+                                <td>Rp. {{ number_format($data['subtotal'],0,',','.') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
-
                 </table>
             </div>
+
+            @php $totalSubtotal = array_sum(array_column($cartData, 'subtotal')); @endphp
 
             <div class="mt-6 space-y-2 text-right">
                 <div class="font-semibold text-lg text-gray-700">
                     <p>Total Harga</p>
-                    <p id="total-harga" class="text-xl text-blue-700 font-bold">Rp. {{ number_format($data['subtotal'], 0, ',', '.') }}</p>
+                    <p id="total-harga" class="text-xl text-blue-700 font-bold">
+                        Rp. {{ number_format($totalSubtotal,0,',','.') }}
+                    </p>
                 </div>
+
                 <div class="font-semibold text-lg text-gray-700">
                     <p>Total Bayar</p>
-                    <p id="total-bayar" class="text-xl text-green-600 font-bold">Rp. {{ number_format($sales->total_paid, 0, ',', '.') }}</p>
+                    <p id="total-bayar" class="text-xl text-green-600 font-bold">
+                        Rp. {{ number_format($sales?->total_paid ?? 0,0,',','.') }}
+                    </p>
                 </div>
             </div>
         </div>
 
+        <!-- Detail Member -->
         <div class="flex-1 border border-gray-200 p-6 rounded-xl">
             <h2 class="text-2xl font-bold text-gray-700 mb-4">Detail Member</h2>
 
             <form action="{{ route('petugas.pembelian.simpan_member') }}" method="POST">
                 @csrf
 
+                <input type="hidden" name="member_id" value="{{ $members?->id }}">
+                <input type="hidden" name="total_bayar" id="input-total-bayar" value="{{ $totalSubtotal }}">
+
                 <div class="mb-5">
                     <label class="block font-semibold text-gray-600">Nama Member</label>
-                    <input type="text" name="nama" class="w-full p-3 border border-gray-300 rounded-md mt-1 focus:ring focus:ring-blue-100" value="{{ $sales->name }}" >
+                    <input type="text" name="nama"
+                        value="{{ $members?->name }}"
+                        class="w-full p-3 border rounded-md mt-1">
                 </div>
 
                 <div class="mb-5">
                     <label class="block font-semibold text-gray-600">Poin</label>
-                    <input type="number" name="poin" class="w-full p-3 bg-gray-100 border border-gray-300 rounded-md mt-1" value="{{ $members->points }}" readonly>
+                    <input type="number"
+                        value="{{ $members?->points ?? 0 }}"
+                        class="w-full p-3 bg-gray-100 border rounded-md mt-1"
+                        readonly>
                 </div>
 
+                <!-- CHECKBOX -->
                 <div class="flex items-center gap-3 mb-6">
-                    <input type="checkbox" id="gunakan-poin" name="gunakan_poin" value="1" class="form-check-input rounded"
-                        {{ !$hasPreviousPurchase ? 'disabled' : '' }}>
+                    <input type="hidden" name="gunakan_poin" value="0">
+
+                    <input type="checkbox"
+                        id="gunakan-poin"
+                        name="gunakan_poin"
+                        value="1"
+                        class="form-check-input rounded">
+
                     <label for="gunakan-poin" class="text-gray-700 font-medium">
                         Gunakan Poin
-                        @if(!$hasPreviousPurchase)
-                            <span class="text-sm text-red-500 block">* Poin hanya bisa digunakan setelah pembelian pertama</span>
-                        @endif
                     </label>
                 </div>
 
-
-                <input type="hidden" name="member_id" value="{{ $members->id }}">
-                <input type="hidden" name="total_bayar" value="{{ $sales->total_paid }}">
-
                 <div class="flex justify-end">
-                    <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-200">Selanjutnya</button>
+                    <button type="submit"
+                            class="bg-blue-600 text-white px-8 py-3 rounded-lg shadow-md hover:bg-blue-700">
+                        Selanjutnya
+                    </button>
                 </div>
             </form>
         </div>
     </div>
+
+    <!-- SWEETALERT -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const checkbox = document.getElementById('gunakan-poin');
+            const hasPreviousPurchase = {{ $hasPreviousPurchase ? 'true' : 'false' }};
+            const memberPoints = {{ $members?->points ?? 0 }};
+
+            checkbox.addEventListener('change', function () {
+
+                // ❌ belum pernah beli
+                if (!hasPreviousPurchase) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Poin belum bisa digunakan',
+                        text: 'Poin hanya bisa digunakan setelah pembelian pertama',
+                    });
+                    checkbox.checked = false;
+                    return;
+                }
+
+                // ❌ poin kosong
+                if (memberPoints <= 0) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Poin kosong',
+                        text: 'Poin kamu masih 0',
+                    });
+                    checkbox.checked = false;
+                    return;
+                }
+            });
+        });
+    </script>
 </x-app-layout>

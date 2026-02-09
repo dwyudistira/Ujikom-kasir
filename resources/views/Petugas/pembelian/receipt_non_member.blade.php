@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-        <!-- Header dengan tombol aksi yang lebih stylish -->
         <div class="flex justify-between mb-8 items-center">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">INVOICE</h1>
@@ -19,7 +18,7 @@
             </div>
         </div>
 
-        <div class="border-t-2 border-b-2 border-gray-200 py-1 my-6"></div>
+        <div class="border-b-2 border-gray-200 py-1 my-6"></div>
 
         <div class="mb-8 overflow-x-auto">
             <table class="w-full">
@@ -55,16 +54,29 @@
             </div>
         </div>
 
-        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-lg font-medium text-gray-700">REMBALLAN</span>
-                <span class="text-lg font-medium text-gray-800">Rp. {{ $kembalian }}</span>
+        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-lg font-medium text-gray-700">TOTAL</span>
+                <span class="text-lg font-semibold text-gray-800">
+                    Rp. {{ number_format($subtotal, 0, ',', '.') }}
+                </span>
             </div>
+
+            <div class="flex justify-between items-center">
+                <span class="text-lg font-medium text-gray-700">TOTAL BAYAR</span>
+                <span class="text-lg font-semibold text-gray-800">
+                    Rp. {{ number_format($sales->total_paid, 0, ',', '.') }}
+                </span>
+            </div>
+
             <div class="flex justify-between items-center pt-4 border-t border-gray-200">
-                <span class="text-2xl font-bold text-gray-800">TOTAL</span>
-                <span class="text-2xl font-bold text-blue-600">Rp. {{ number_format($subtotal, 0, ',', '.') }}</span>
+                <span class="text-2xl font-bold text-gray-800">KEMBALIAN</span>
+                <span class="text-2xl font-bold text-blue-600">
+                    Rp. {{ number_format($kembalian, 0, ',', '.') }}
+                </span>
             </div>
         </div>
+
 
         <div class="mt-8 text-center text-sm text-gray-500">
             <p>Terima kasih telah berbelanja bersama kami</p>

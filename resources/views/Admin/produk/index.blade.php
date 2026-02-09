@@ -83,17 +83,19 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ $product->name }}</div>
-                                <div class="text-xs text-gray-500 mt-1">ID: {{ $product->id }}</div>
+                                <div class="text-xs text-gray-500 mt-1">ID: {{ $product->stock }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                                 Rp{{ number_format($product->price, 0, ',', '.') }}
                             </td>
+                            
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {{ $product->stock > 10 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    {{ $product->stock <= 5 ? 'bg-red-100 text-red-800' : ($product->stock <= 10 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800')}}">
                                     {{ $product->stock }} pcs
                                 </span>
                             </td>
+
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
                                     <a href="{{ route('admin.product.edit', $product->id) }}" 

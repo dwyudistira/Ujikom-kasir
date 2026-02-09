@@ -83,19 +83,21 @@
                             <td class="px-6 py-4">{{ $purchase['made_by'] }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex space-x-2">
-                                    <button
-                                    type="button"
-                                        class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md text-sm flex items-center"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#detailPenjualanModal"
-                                        data-name="{{ $purchase['name'] }}"
-                                        data-phone="{{ $purchase['phone'] }}"
-                                        data-poin="{{ $purchase['poin'] }}" 
-                                        data-date="{{ $purchase['created_at']->format('d-m-Y H:i:s') }}"
-                                        data-user="{{ $purchase['made_by'] }}"
-                                        data-products='@json($purchase["products"])'
-                                        data-joined-date="{{ $purchase['joined_date'] }}"
-                                    >
+                                        <button
+                                            type="button"
+                                            class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md text-sm flex items-center"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detailPenjualanModal"
+                                            data-name="{{ $purchase['name'] }}"
+                                            data-phone="{{ $purchase['phone'] }}"
+                                            data-poin="{{ $purchase['poin'] }}" 
+                                            data-date="{{ $purchase['created_at']->format('d-m-Y H:i:s') }}"
+                                            data-user="{{ $purchase['made_by'] }}"
+                                            data-products='@json($purchase["products"])'
+                                            data-joined-date="{{ $purchase['joined_date'] }}"
+                                            data-total-paid="{{ $purchase['total_paid'] }}"
+                                            data-diskon-member="{{ $purchase['diskon_member'] }}"
+                                        >
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -155,6 +157,7 @@
                     <div class="text-end mt-3">
                         <strong>Total:</strong> <span id="modal-total">Rp 0</span>
                     </div>
+
                     <div class="text-xs text-gray-500 mt-4 text-center">
                         <p>Dibuat pada: <span id="modal-date"></span></p>
                         <p>Oleh: <span id="modal-user"></span></p>
@@ -172,37 +175,60 @@
 
     <script>
         const detailModal = document.getElementById('detailPenjualanModal');
+
         detailModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
+
             const products = JSON.parse(button.getAttribute('data-products') || '[]');
-            const name = button.getAttribute('data-name');
             const phone = button.getAttribute('data-phone');
             const poin = button.getAttribute('data-poin');
             const date = button.getAttribute('data-date');
             const user = button.getAttribute('data-user');
             const joinedDate = button.getAttribute('data-joined-date');
-            
-            document.getElementById('modal-poin').textContent = poin || '-';
-            document.getElementById('modal-joined-date').textContent = joinedDate || '-';
-            document.getElementById('modal-phone').textContent = phone || '-';
-            document.getElementById('modal-date').textContent = date || '-';
-            document.getElementById('modal-user').textContent = user || '-';
+            const totalPaid = Number(button.getAttribute('data-total-paid')) || 0;
+            const diskonMember = Number(button.getAttribute('data-diskon-member')) || 0;
 
-            let total = 0;
+            document.getElementById('modal-poin').textContent =
+                poin ? Number(poin).toLocaleString('id-ID') : '-';
+            document.getElementById('modal-joined-date').textContent = joinedDate ?? '-';
+            document.getElementById('modal-phone').textContent = phone ?? '-';
+            document.getElementById('modal-date').textContent = date ?? '-';
+            document.getElementById('modal-user').textContent = user ?? '-';
+
+            let subtotal = 0;
             let productRows = '';
+
             products.forEach(product => {
-                total += product.sub_total;
+                const qty = Number(product.qty) || 0;
+                const price = Number(product.price) || 0;
+
+                const subTotal = qty * price;
+                subtotal += subTotal;
+
                 productRows += `
                     <tr>
-                        <td>${product.name}</td>
-                        <td>${product.qty}</td>
-                        <td>Rp ${product.price}</td>
-                        <td>Rp ${product.sub_total}</td>
+                        <td>${product.name ?? '-'}</td>
+                        <td>${qty}</td>
+                        <td>Rp ${price.toLocaleString('id-ID')}</td>
+                        <td>Rp ${subTotal.toLocaleString('id-ID')}</td>
                     </tr>
                 `;
             });
-            document.getElementById('modal-product-body').innerHTML = productRows;
-            document.getElementById('modal-total').textContent = `Rp ${total.toLocaleString()}`;
+
+            const totalAfterDiscount = subtotal - diskonMember;
+            const kembalian = totalPaid - totalAfterDiscount;
+
+            document.getElementById('modal-product-body').innerHTML =
+                productRows || `<tr><td colspan="4" class="text-center">Tidak ada produk</td></tr>`;
+
+            document.getElementById('modal-total').innerHTML = `
+                <p><strong>SUBTOTAL:</strong> Rp ${subtotal.toLocaleString('id-ID')}</p>
+                <p><strong>DISKON POIN:</strong> - Rp ${diskonMember.toLocaleString('id-ID')}</p>
+                <p><strong>TOTAL:</strong> Rp ${totalAfterDiscount.toLocaleString('id-ID')}</p>
+                <p><strong>PEMBAYARAN:</strong> Rp ${totalPaid.toLocaleString('id-ID')}</p>
+                <p><strong>KEMBALIAN:</strong> Rp ${kembalian.toLocaleString('id-ID')}</p>
+            `;
         });
     </script>
+
 </x-app-layout>

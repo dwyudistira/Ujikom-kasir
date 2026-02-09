@@ -10,7 +10,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;   
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Route::get('/dashboard', function () {
@@ -29,7 +29,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
      Route::put('/admin/pembelian-update', [PembelianController::class, "update"])->name("admin.pembelian.update");
      Route::delete('/admin/pembelian-destroy', [PembelianController::class, "destroy"])->name("admin.pembelian.destroy");
      Route::get('/admin/export-pembelian', [PembelianController::class, 'export'])->name('admin.pembelian.export');
-     Route::get('/export-pdf/{id}', [PembelianController::class, 'exportPdfId'])->name('admin.pembelian.export-pdf-id');
+     
     //produk 
     route::get('/admin/produk',[ProdukController::class, 'index'])->name('admin.product');
     route::get('/admin/produk/create',[ProdukController::class, 'create'])->name('admin.product.create');
@@ -46,6 +46,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     route::get('/admin/user/edit/{id}',[UserController::class, 'edit'])->name('admin.user.edit');
     route::put('/admin/user/update/{id}',[UserController::class, 'update'])->name('admin.user.update');
     route::delete('/admin/user/delete/{id}',[UserController::class, 'destroy'])->name('admin.user.destroy');
+
+    //export PDF 
+    Route::get('/admin/pembelian/export-pdf', [PembelianController::class, 'exportPdf'])->name('admin.pembelian.export-pdf');
+    Route::get('/admin/pembelian/export-pdf/{id}', [PembelianController::class, 'exportPdfId'])->name('admin.pembelian.export-pdf-id');
 });
 
 Route::middleware(['auth', 'petugas'])->group(function () {
